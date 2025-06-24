@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Website Builder Agent</title>
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&family=Fira+Code:wght@400;600&display=swap">
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    <style>
+        body { background: #f9f9fb; font-family: 'Inter', sans-serif; }
+        .card { background: #fff; border-radius: 1rem; box-shadow: 0 2px 16px 0 #e0e7ef; }
+        .accent { color: #6366F1; }
+        .btn-indigo { background: #6366F1; color: #fff; }
+        .btn-indigo:hover { background: #4f46e5; }
+        .btn-success { background: #22c55e; color: #fff; }
+        .btn-success:hover { background: #16a34a; }
+        .btn-danger { background: #ef4444; color: #fff; }
+        .btn-danger:hover { background: #b91c1c; }
+        .code-font { font-family: 'Fira Code', 'JetBrains Mono', monospace; }
+        .device-frame { border: 1px solid #e5e7eb; border-radius: 1.5rem; box-shadow: 0 2px 16px 0 #e0e7ef; background: #fff; }
+        .collapsible { transition: width 0.3s; }
+        .tab-active { border-bottom: 2px solid #6366F1; color: #6366F1; }
+    </style>
+</head>
+<body class="min-h-screen">
+    <!-- Top Navigation -->
+    <header class="sticky top-0 z-20 bg-white shadow flex items-center justify-between px-8 py-4 border-b card">
+        <div class="flex items-center gap-4">
+            <span class="text-2xl font-bold accent">🌟 AI Website Builder Agent</span>
+            <span class="text-gray-400">/</span>
+            <span id="breadcrumb" class="text-gray-600">Project: <span class="font-semibold">Untitled</span> <span class="text-gray-400">/</span> <span id="current-file">index.html</span></span>
+        </div>
+        <div class="flex items-center gap-4">
+            <form id="prompt-form" class="flex w-96 max-w-full">
+                <input id="prompt-input" class="flex-1 border border-gray-300 rounded-l px-3 py-2 focus:ring-2 focus:ring-indigo-300" placeholder="Describe the website you want to build..." required />
+                <button type="submit" class="btn-indigo px-4 py-2 rounded-r font-semibold">Build Website</button>
+            </form>
+            <button class="ml-4 text-gray-400 hover:text-indigo-500 text-2xl" title="Settings"><span>⚙️</span></button>
+        </div>
+    </header>
+    <main class="flex max-w-7xl mx-auto mt-8 gap-4">
+        <!-- File Tree Sidebar -->
+        <aside id="file-tree" class="collapsible w-64 min-w-[140px] max-w-xs bg-gray-50 border-r p-4 overflow-y-auto h-[700px] card flex flex-col">
+            <div class="flex items-center justify-between mb-2">
+                <span class="font-semibold text-gray-700">Files</span>
+                <button id="collapse-sidebar" class="text-gray-400 hover:text-indigo-500">⏴</button>
+            </div>
+            <!-- File tree will be rendered here -->
+        </aside>
+        <!-- Main Content -->
+        <section class="flex-1 flex flex-col gap-4">
+            <!-- Code Editor Card -->
+            <div class="card p-4">
+                <div class="flex items-center justify-between mb-2">
+                    <label class="font-semibold">Generated Website Code (HTML/CSS/JS)</label>
+                    <button id="toggle-theme" class="text-gray-400 hover:text-indigo-500" title="Toggle Light/Dark">🌓</button>
+                </div>
+                <div id="monaco-container" class="w-full h-56 border rounded bg-gray-50 code-font"></div>
+            </div>
+            <!-- Live Preview Card -->
+            <div class="card p-4">
+                <div class="flex items-center justify-between mb-2">
+                    <label class="font-semibold">Live Preview</label>
+                    <div class="flex gap-2">
+                        <button class="device-toggle" data-device="desktop" title="Desktop"><span>🖥️</span></button>
+                        <button class="device-toggle" data-device="tablet" title="Tablet"><span>📱</span></button>
+                        <button class="device-toggle" data-device="mobile" title="Mobile"><span>📲</span></button>
+                    </div>
+                </div>
+                <div class="flex justify-center">
+                    <div class="device-frame p-2">
+                        <iframe id="site-preview" class="w-[400px] h-[600px] border-none rounded bg-white" sandbox="allow-scripts allow-same-origin"></iframe>
+                    </div>
+                </div>
+            </div>
+            <!-- Logs Panel Card -->
+            <div class="card p-4">
+                <div class="flex gap-4 mb-2">
+                    <button class="tab-active px-3 py-1 font-semibold" id="tab-info">[INFO]</button>
+                    <button class="px-3 py-1 font-semibold text-gray-500 hover:text-indigo-500" id="tab-error">[ERROR]</button>
+                    <button class="px-3 py-1 font-semibold text-gray-500 hover:text-indigo-500" id="tab-suggestions">[SUGGESTIONS]</button>
+                </div>
+                <div id="logs-tabs">
+                    <textarea id="logs-output" class="w-full h-20 font-mono border rounded p-2 bg-gray-50 code-font" readonly></textarea>
+                </div>
+            </div>
+            <!-- Action Buttons -->
+            <div class="flex flex-wrap gap-2">
+                <button id="retry-btn" class="btn-danger px-3 py-1 rounded flex items-center gap-1">🔁 Retry</button>
+                <button id="download-btn" class="btn-success px-3 py-1 rounded flex items-center gap-1">⬇️ Download</button>
+                <button id="reflect-btn" class="btn-indigo px-3 py-1 rounded flex items-center gap-1">🔍 Reflect Again</button>
+                <button id="live-preview-btn" class="btn-indigo px-3 py-1 rounded flex items-center gap-1 hidden">🚀 Live React Preview</button>
+                <button id="deploy-vercel-btn" class="bg-black text-white px-3 py-1 rounded flex items-center gap-1 hidden">▲ Deploy to Vercel</button>
+                <button id="deploy-netlify-btn" class="bg-green-800 text-white px-3 py-1 rounded flex items-center gap-1 hidden">⧫ Deploy to Netlify</button>
+            </div>
+            <div id="stackblitz-container" class="w-full h-[600px] mb-4 hidden"></div>
+        </section>
+    </main>
+    <div id="funny-loading" class="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-30 hidden">
+        <div class="card p-8 flex flex-col items-center gap-4 animate-bounce">
+            <div class="text-5xl">👷‍♂️🔨</div>
+            <div class="text-xl font-bold accent">Building your website...</div>
+            <div class="text-gray-500">The AI hamsters are running on their wheels! 🐹⚡</div>
+        </div>
+    </div>
+    <script type="module" src="/static/app.js"></script>
+    <script>
+    // Funny loading overlay logic
+    const loadingDiv = document.getElementById('funny-loading');
+    const promptForm = document.getElementById('prompt-form');
+    if (promptForm) {
+      promptForm.addEventListener('submit', () => {
+        if (loadingDiv) loadingDiv.classList.remove('hidden');
+      });
+    }
+    window.hideFunnyLoading = function() {
+      if (loadingDiv) loadingDiv.classList.add('hidden');
+    }
+    </script>
+</body>
+</html>

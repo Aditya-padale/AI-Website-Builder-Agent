@@ -1,0 +1,12 @@
+body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+textarea {
+    resize: vertical;
+}
+
+button:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
