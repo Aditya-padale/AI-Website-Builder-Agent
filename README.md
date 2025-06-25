@@ -4,6 +4,12 @@ A modern, full-stack AI-powered website builder that generates high-quality, int
 
 ---
 
+## Live Demo
+
+🔗 Live Demo: [ai-website-builder-agent-3.onrender.com](https://ai-website-builder-agent-3.onrender.com)
+
+---
+
 ## Features
 
 - **AI Website Generation:**
@@ -57,8 +63,7 @@ A modern, full-stack AI-powered website builder that generates high-quality, int
 
 4. **Run the backend server:**
    ```sh
-   cd backend
-   python main.py
+   uvicorn backend.main:app --reload
    ```
    The server will start at `http://localhost:8000`.
 
